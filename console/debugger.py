@@ -716,6 +716,22 @@ def do_debug(args):
                 dbg.enter_fast_mode()
                 print('Entered fast mode, press reset button to debug again')
                 break
+            elif cmd in ('m', 'memory'):
+                if len(args) < 1:
+                    print('Usage: m <address> [length]')
+                else:
+                    addr = int(args[0], 16)  # Assume address is in hex
+                    length = int(args[1], 16) if len(args) > 1 else 16  # Default to 16 bytes
+                    try:
+                        # While the memory read completes successfully,
+                        # the CPU encounters an error when it resumes operation
+                        memory_contents = dbg.read(addr, length)
+                        print(f"Memory at ${addr:04X}:")
+                        for i in range(0, len(memory_contents), 16):
+                            chunk = memory_contents[i:i+16]
+                            print(f"${addr + i:04X}: {' '.join(f'{b:02X}' for b in chunk)}")
+                    except Exception as e:
+                        print(f"Error reading memory: {e}")
             else:
                 print(f'Unknown command {repr(cmd)}')
         except ValueError as e:
