@@ -463,7 +463,7 @@ async def do_deploy(args, is_bin=False):
 
     print('Connecting to debugger')
     dbg = Debugger()
-    await dbg.open(infer_port(args.port))
+    await dbg.begin(infer_port(args.port))
     try:
         print(f'Firmware version: {dbg.print_info()}')
         print('Successfully connected to debugger!')
@@ -571,7 +571,8 @@ async def do_debug(args):
         print(f'Loaded debug info for file {listing.file_name}')
 
     print('Connecting to debugger')
-    dbg = Debugger.open(infer_port(args.port))
+    dbg = Debugger()
+    await dbg.begin(infer_port(args.port))
     try:
         print(f'Firmware version: {await dbg.print_info()}')
         print('Successfully connected to debugger!')

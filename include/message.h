@@ -77,7 +77,7 @@ union Command {
 	ReadMemoryCmd read_memory;
 	SetBreakpointCmd set_breakpoint;
 	SectorEraseCmd sector_erase;
-} body;
+};
 
 #define ERR_NO_CMD -1
 #define ERR_BAD_CMD -2
@@ -95,7 +95,7 @@ void send_packet(CommandType ty, const uint8_t *body, uint16_t len);
 
 template< typename T >
 void send_packet(CommandType ty, const T& body) {
-	send_packet(ty, (const uint8_t *)body, sizeof(T));
+	send_packet(ty, reinterpret_cast<const uint8_t*>(&body), sizeof(T));
 }
 
 int recv_packet(CommandType &ty, uint8_t *buf, uint16_t *len);
