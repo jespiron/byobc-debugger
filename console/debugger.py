@@ -220,14 +220,16 @@ class DebuggerIo:
     
     async def begin(self, port):
         self.reader, self.writer = await serial_asyncio.open_serial_connection(url=port, baudrate=115200)
+        self.reader_task = asyncio.create_task(self._tx_handler())
+        self.writer_task = asyncio.create_task(self._rx_handler())
 
-        async with asyncio.TaskGroup() as tg:
-            tx = tg.create_task(self._tx_handler())
-            rx = tg.create_task(self._rx_handler())
+        #async with asyncio.TaskGroup() as tg:
+        #    tx = tg.create_task(self._tx_handler())
+        #    rx = tg.create_task(self._rx_handler())
     
     async def run_cmd(self, ty, cmd):
-        await self.d2h_queue.put((ty, cmd))
-        reply_ty, reply_body = await self.h2d_queue.get()
+        await self.h2d_queue.put((ty, cmd))
+        reply_ty, reply_body = await self.d2h_queue.get()
         if reply_ty == CMD_ERROR:
             raise Exception(f'error {ty} {cmd} -> {reply_ty} {reply_body}')
         elif reply_ty != ty:
@@ -257,7 +259,7 @@ class DebuggerIo:
         elif ty == CMD_HIT_BREAKPOINT:
             print('HIT BREAKPOINT: ', body)
         else:
-            await self.d2h_queue.put((ty, body))
+            await self.h2d_queue.put((ty, body))
 
 
 EEPROM_PAGE_BITS = 6
